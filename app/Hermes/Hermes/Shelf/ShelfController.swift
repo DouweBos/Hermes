@@ -69,18 +69,10 @@ final class ShelfController {
     private func makePanel() -> ShelfPanel {
         if let panel { return panel }
         let panel = ShelfPanel(controller: self)
-        let container = DropTargetView(controller: self)
-        let hosting = NSHostingView(rootView: ShelfRootView(controller: self))
+        // The panel decides its own size; letting SwiftUI size the window feeds back into layout.
+        let hosting = ShelfHostingView(controller: self)
         hosting.sizingOptions = []
-        hosting.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(hosting)
-        NSLayoutConstraint.activate([
-            hosting.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            hosting.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            hosting.topAnchor.constraint(equalTo: container.topAnchor),
-            hosting.bottomAnchor.constraint(equalTo: container.bottomAnchor)
-        ])
-        panel.contentView = container
+        panel.contentView = hosting
         self.panel = panel
         installKeyMonitor()
         return panel

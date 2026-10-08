@@ -7,7 +7,7 @@ A free, open source drag-and-drop shelf for macOS: a menu bar app with a floatin
 - This is not a production app. Never plan or implement data migrations — just refactor directly.
 - Never name or compare Hermes to other shelf apps anywhere in the repository: code, docs, commit messages.
 - Plain AppKit app (`main.swift`, no SwiftUI `App`): the menu bar item is an `NSStatusItem` (`StatusItemController`) and Settings is a hand-hosted window, so the menu can use Continuity Camera and section headers.
-- The shelf is an `NSPanel` (`ShelfPanel`) hosting SwiftUI. Drags in and out go through AppKit (`DropTargetView`, `ItemDragSourceView`), not SwiftUI's `onDrop`/`onDrag`, which can't drag several files or report where a drag ended.
+- The shelf is an `NSPanel` (`ShelfPanel`) hosting SwiftUI. Drags in and out go through AppKit (`ShelfHostingView`, `ItemDragSourceView`), not SwiftUI's `onDrop`/`onDrag`, which can't drag several files or report where a drag ended.
 - Panel sizes come from `ShelfLayout`; tiles have a fixed height so sizes can be expressed in items.
 - `ShelfController` owns the panel and its modes (hidden, handle, open); views call functions on it rather than mutating stores directly.
 - Settings keys live in `SettingKey`; views bind with `@AppStorage`, services read `Preferences` at the moment they need a value.

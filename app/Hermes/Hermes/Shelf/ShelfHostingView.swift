@@ -1,19 +1,23 @@
-// Shelf/DropTargetView.swift
+// Shelf/ShelfHostingView.swift
 // Hermes
 //
-// The panel's content view: takes drops anywhere on the shelf.
+// The panel's content view: hosts the SwiftUI shelf and takes drops anywhere on it.
 
 import AppKit
+import SwiftUI
 
-final class DropTargetView: NSView {
+final class ShelfHostingView: NSHostingView<ShelfRootView> {
     private weak var controller: ShelfController?
 
     init(controller: ShelfController) {
         self.controller = controller
-        super.init(frame: .zero)
+        super.init(rootView: ShelfRootView(controller: controller))
         let promiseTypes = NSFilePromiseReceiver.readableDraggedTypes.map { NSPasteboard.PasteboardType($0) }
         registerForDraggedTypes([.fileURL, .URL, .string, .rtf, .png, .tiff] + PasteboardReader.imageTypes + promiseTypes)
     }
+
+    @available(*, unavailable)
+    required init(rootView: ShelfRootView) { fatalError("init(rootView:) has not been implemented") }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
