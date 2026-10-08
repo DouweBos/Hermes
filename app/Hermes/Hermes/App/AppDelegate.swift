@@ -86,9 +86,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Starts or stops the optional monitors and moves the shelf when its edge changes.
     private func applyPreferences() {
-        if Preferences.clipboardHistory, !clipboardMonitor.isRunning {
+        // Clipboard screenshots come through the clipboard monitor too.
+        let watchClipboard = Preferences.clipboardHistory || Preferences.captureScreenshots
+        if watchClipboard, !clipboardMonitor.isRunning {
             clipboardMonitor.start()
-        } else if !Preferences.clipboardHistory, clipboardMonitor.isRunning {
+        } else if !watchClipboard, clipboardMonitor.isRunning {
             clipboardMonitor.stop()
         }
         history.trim(to: Preferences.clipboardLimit)
@@ -102,6 +104,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func recordClipboard(_ pasteboard: NSPasteboard) {
+        if Preferences.captureScreenshots, PasteboardReader.isLikelyScreenshot(pasteboard) {
+            controller.addClipboardScreenshot(pasteboard)
+        }
+        guard Preferences.clipboardHistory else { return }
         let entries = controller.reader.entries(from: pasteboard, prefer: .text)
         history.record(entries, limit: Preferences.clipboardLimit)
     }

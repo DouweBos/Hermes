@@ -33,6 +33,12 @@ struct PasteboardReader {
         return concealedTypes.contains(where: types.contains)
     }
 
+    /// Screenshots copied to the clipboard arrive as bare PNG; images copied from apps carry other formats too.
+    static func isLikelyScreenshot(_ pasteboard: NSPasteboard) -> Bool {
+        guard let items = pasteboard.pasteboardItems, items.count == 1 else { return false }
+        return items[0].types == [.png]
+    }
+
     func entries(from pasteboard: NSPasteboard, prefer preference: Preference) -> [ShelfEntry] {
         let files = fileEntries(from: pasteboard)
         if !files.isEmpty { return files }

@@ -63,7 +63,10 @@ private struct GeneralSettings: View {
                     .font(.caption)
                     .foregroundStyle(Theme.textSecondary)
                 Toggle("Group items dropped together into a stack", isOn: $stackDrops)
-                Toggle("Add new screenshots to the shelf", isOn: $captureScreenshots)
+                Toggle(isOn: $captureScreenshots) {
+                    Text("Add new screenshots to the shelf")
+                    Text("Saved screenshots and ones copied to the clipboard.")
+                }
             }
             Section {
                 Toggle("Open at login", isOn: Binding(get: { launchAtLogin.isEnabled }, set: launchAtLogin.set))

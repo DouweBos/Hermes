@@ -69,6 +69,23 @@ struct PasteboardTests {
         #expect(reader.entries(from: board, prefer: .text).first?.kind == .text)
     }
 
+    @Test func barePNGLooksLikeAScreenshot() throws {
+        let png = try #require(NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 2, pixelsHigh: 2, bitsPerSample: 8,
+                                                samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+                                                colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)?
+            .representation(using: .png, properties: [:]))
+        let screenshot = pasteboard { $0.setData(png, forType: .png) }
+        #expect(PasteboardReader.isLikelyScreenshot(screenshot))
+        let copiedImage = pasteboard {
+            $0.declareTypes([.png, .tiff], owner: nil)
+            $0.setData(png, forType: .png)
+            $0.setData(png, forType: .tiff)
+        }
+        #expect(!PasteboardReader.isLikelyScreenshot(copiedImage))
+        let text = pasteboard { $0.setString("hi", forType: .string) }
+        #expect(!PasteboardReader.isLikelyScreenshot(text))
+    }
+
     @Test func concealedContentIsRecognized() {
         let board = pasteboard {
             $0.declareTypes([.string, .init("org.nspasteboard.ConcealedType")], owner: nil)

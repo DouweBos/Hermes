@@ -4,6 +4,7 @@
 // What the shelf does with drops, clicks, keys and menu commands.
 
 import AppKit
+import UniformTypeIdentifiers
 
 extension ShelfController {
     // MARK: - Dropping in
@@ -91,7 +92,18 @@ extension ShelfController {
     }
 
     func addScreenshot(_ url: URL) {
-        add([store.storage.fileEntry(for: url)], source: .screenshot)
+        addScreenshot(store.storage.fileEntry(for: url))
+    }
+
+    func addClipboardScreenshot(_ pasteboard: NSPasteboard) {
+        guard let data = pasteboard.data(forType: .png),
+              let entry = store.storage.imageEntry(data, type: .png, name: ItemStorage.timestampedName("Screenshot"))
+        else { return }
+        addScreenshot(entry)
+    }
+
+    private func addScreenshot(_ entry: ShelfEntry) {
+        add([entry], source: .screenshot)
         open(tab: .shelf)
         if !isPointerInside { scheduleCollapse(after: 3) }
     }
