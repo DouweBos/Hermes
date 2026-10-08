@@ -60,6 +60,22 @@ struct ItemTile: View {
         .frame(height: ShelfLayout.tileHeight)
         .background(fill, in: RoundedRectangle(cornerRadius: Theme.Radius.tile, style: .continuous))
         .overlay(ItemInteraction(controller: controller, target: .item(item.id)))
+        .overlay(alignment: .topTrailing) {
+            if isHovered {
+                Button {
+                    controller.remove([item.id])
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 15))
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(Theme.textPrimary, Theme.surfaceRaised)
+                }
+                .buttonStyle(.plain)
+                .padding(4)
+                .help("Remove from Shelf")
+                .accessibilityLabel("Remove \(item.title)")
+            }
+        }
         .overlay(alignment: .topLeading) {
             if item.isPinned {
                 Image(systemName: "pin.fill")

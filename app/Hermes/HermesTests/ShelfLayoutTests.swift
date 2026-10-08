@@ -23,9 +23,9 @@ struct ShelfLayoutTests {
         #expect(abs(frame.midY - visible.midY) <= 1)
     }
 
-    @Test func handleSitsFlushOnTheLeftEdge() {
+    @Test func handleSitsOnTheLeftEdge() {
         let frame = frame(.handle, edge: .left)
-        #expect(frame.minX == visible.minX)
+        #expect(frame.minX == visible.minX + ShelfLayout.edgeInset)
         #expect(frame.size == ShelfLayout.handleSize)
     }
 

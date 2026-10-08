@@ -11,7 +11,7 @@ struct ShelfRootView: View {
     var body: some View {
         Group {
             if controller.mode == .handle {
-                HandleView(count: controller.store.items.count)
+                HandleView(items: controller.store.items)
             } else {
                 ShelfView(controller: controller)
             }
@@ -20,24 +20,25 @@ struct ShelfRootView: View {
     }
 }
 
+/// The collapsed shelf: a preview of the newest item and how many there are.
 struct HandleView: View {
-    let count: Int
-    @AppStorage(SettingKey.edge) private var edge = ShelfEdge.right
+    let items: [ShelfItem]
 
     var body: some View {
-        VStack(spacing: Theme.Spacing.xs) {
-            Image(systemName: edge == .right ? "chevron.compact.left" : "chevron.compact.right")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(Theme.textSecondary)
-            Text("\(count)")
-                .font(.badge)
-                .monospacedDigit()
-                .foregroundStyle(Theme.accent)
+        ZStack(alignment: .topTrailing) {
+            if let newest = items.first {
+                StackThumbnail(item: newest, size: 48)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            if items.count > 1 {
+                CountBadge(count: items.count)
+                    .padding(5)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .shelfSurface(cornerRadius: 10)
+        .shelfSurface(cornerRadius: 14)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Shelf, \(count) items")
+        .accessibilityLabel("Shelf, \(items.count) items")
     }
 }
 

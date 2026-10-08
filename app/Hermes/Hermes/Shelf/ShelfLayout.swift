@@ -7,7 +7,7 @@ import AppKit
 
 enum ShelfLayout {
     static let width: CGFloat = 184
-    static let handleSize = CGSize(width: 22, height: 88)
+    static let handleSize = CGSize(width: 72, height: 80)
     static let edgeInset: CGFloat = 8
     static let headerHeight: CGFloat = 35
     static let listPadding: CGFloat = 8
@@ -50,7 +50,7 @@ enum ShelfLayout {
     static func frame(for mode: ShelfMode, edge: ShelfEdge, position: ShelfPosition,
                       height: CGFloat, in visible: NSRect) -> NSRect {
         let size = mode == .handle ? handleSize : CGSize(width: width, height: min(height, visible.height - 2 * edgeInset))
-        let inset = mode == .handle ? 0 : edgeInset
+        let inset = edgeInset
         let x = edge == .right ? visible.maxX - size.width - inset : visible.minX + inset
         let y = switch position {
         case .top: visible.maxY - size.height - edgeInset
