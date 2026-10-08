@@ -1,0 +1,51 @@
+{
+  "setup": {
+    "copy": [
+      {
+        "path": ".claude",
+        "exclude": [
+          "worktrees/**",
+          "projects/**/worktrees/**",
+          "scheduled_tasks.lock"
+        ]
+      }
+    ],
+    "symlink": [],
+    "commands": []
+  },
+  "terminals": [
+    {
+      "name": "Shell",
+      "dir": "."
+    }
+  ],
+  "run": [
+    {
+      "title": "Build & Run Hermes",
+      "command": "xcodebuild -project Hermes.xcodeproj -scheme Hermes -derivedDataPath build -destination 'platform=macOS,arch=arm64' build && (pkill -x Hermes; open -n build/Build/Products/Debug/Hermes.app --args -HermesStorage /tmp/hermes-dev)",
+      "cwd": "app/Hermes",
+      "restartOnRerun": true
+    },
+    {
+      "title": "Unit Tests",
+      "command": "xcodebuild -project Hermes.xcodeproj -scheme Hermes -derivedDataPath build -destination 'platform=macOS,arch=arm64' test -only-testing:HermesTests",
+      "cwd": "app/Hermes",
+      "restartOnRerun": true
+    }
+  ],
+  "workspace_env": [],
+  "platforms": [],
+  "tools": {
+    "disabled": [
+      "device-recording",
+      "device-inspector",
+      "device-control",
+      "device-debug"
+    ]
+  },
+  "agent_prompt": "Hermes is a native macOS menu bar app (no simulators or web runtime). Build and test with xcodebuild from app/Hermes using the worktree-local -derivedDataPath build. Run dev builds with -HermesStorage /tmp/hermes-dev so the real shelf is left alone.",
+  "protected_branches": [
+    "main",
+    "master"
+  ]
+}

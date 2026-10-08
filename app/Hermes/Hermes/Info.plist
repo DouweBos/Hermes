@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Hermes shows previews of the files you put on the shelf and picks up new screenshots.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Hermes shows previews of the files you put on the shelf.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>Hermes shows previews of the files you put on the shelf.</string>
+	<key>NSRemovableVolumesUsageDescription</key>
+	<string>Hermes shows previews of the files you put on the shelf.</string>
+	<key>NSNetworkVolumesUsageDescription</key>
+	<string>Hermes shows previews of the files you put on the shelf.</string>
+</dict>
+</plist>
