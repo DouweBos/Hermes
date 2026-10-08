@@ -21,7 +21,7 @@ struct SettingsView: View {
                 ShortcutSettings()
             }
         }
-        .frame(width: 460)
+        .frame(width: 480, height: 540)
         .scenePadding()
     }
 }

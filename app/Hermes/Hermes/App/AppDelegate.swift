@@ -58,6 +58,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         preferencesMayHaveChanged()
 
+        if UserDefaults.standard.bool(forKey: "HermesOpenSettings") { settingsWindow.show() }
         switch UserDefaults.standard.string(forKey: "HermesOpenShelf") {
         case "clipboard": controller.open(tab: .clipboard)
         case "handle": controller.collapse()

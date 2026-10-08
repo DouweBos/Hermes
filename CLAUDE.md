@@ -29,7 +29,7 @@ xcodebuild -project Hermes.xcodeproj -scheme Hermes -derivedDataPath build -dest
 swiftlint lint --quiet
 ```
 
-Dev launch flags: `-HermesStorage <path>` keeps the shelf and history somewhere other than Application Support (use `/tmp/hermes-dev` when testing), `-HermesOpenShelf shelf|clipboard|handle` shows the shelf on launch.
+Dev launch flags: `-HermesStorage <path>` keeps the shelf and history somewhere other than Application Support (use `/tmp/hermes-dev` when testing), `-HermesOpenShelf shelf|clipboard|handle` shows the shelf on launch, `-HermesOpenSettings YES` opens Settings.
 
 The app icon is generated: edit `scripts/render-icon.swift` and run `swift scripts/render-icon.swift`.
 
