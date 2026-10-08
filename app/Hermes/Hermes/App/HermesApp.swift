@@ -14,7 +14,7 @@ struct HermesApp: App {
         MenuBarExtra {
             MenuBarContent(controller: appDelegate.controller)
         } label: {
-            Image(systemName: appDelegate.store.isEmpty ? "tray" : "tray.full")
+            Image(.menuBarIcon)
                 .accessibilityLabel("Hermes")
         }
 

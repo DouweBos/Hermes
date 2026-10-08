@@ -1,4 +1,5 @@
-// Renders Hermes' app icon into app/Hermes/Hermes/AppIcon.icon (Icon Composer bundle).
+// Renders Hermes' app icon into app/Hermes/Hermes/AppIcon.icon (Icon Composer bundle),
+// and the same glyph as a template image for the menu bar.
 // Usage: swift scripts/render-icon.swift [output .icon path]
 import CoreGraphics
 import Foundation
@@ -20,7 +21,8 @@ let gradientAngle: CGFloat = 20 // degrees off vertical, top-left → bottom-rig
 func point(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: x, y: y) }
 
 /// An open tray with a wing rising from its side: the shelf that carries things.
-func glyph() -> CGPath {
+/// `weight` thickens the strokes so the glyph holds up at menu bar size.
+func glyph(weight: CGFloat = 1) -> CGPath {
     let tray = CGMutablePath()
     tray.move(to: point(250, 500))
     tray.addLine(to: point(250, 690))
@@ -28,7 +30,7 @@ func glyph() -> CGPath {
     tray.addLine(to: point(694, 770))
     tray.addArc(tangent1End: point(774, 770), tangent2End: point(774, 690), radius: 80)
     tray.addLine(to: point(774, 500))
-    let body = tray.copy(strokingWithWidth: 64, lineCap: .round, lineJoin: .round, miterLimit: 10)
+    let body = tray.copy(strokingWithWidth: 64 * weight, lineCap: .round, lineJoin: .round, miterLimit: 10)
 
     let lip = CGMutablePath()
     lip.move(to: point(250, 600))
@@ -37,7 +39,7 @@ func glyph() -> CGPath {
     lip.addLine(to: point(584, 660))
     lip.addLine(to: point(624, 600))
     lip.addLine(to: point(774, 600))
-    let shelf = lip.copy(strokingWithWidth: 48, lineCap: .round, lineJoin: .round, miterLimit: 10)
+    let shelf = lip.copy(strokingWithWidth: 48 * weight, lineCap: .round, lineJoin: .round, miterLimit: 10)
 
     // Three feathers sweeping up and out from a shared root, longest on top.
     var wing = CGMutablePath() as CGPath
@@ -51,7 +53,7 @@ func glyph() -> CGPath {
         let path = CGMutablePath()
         path.move(to: root)
         path.addQuadCurve(to: feather.tip, control: feather.control)
-        wing = wing.union(path.copy(strokingWithWidth: feather.width, lineCap: .round, lineJoin: .round, miterLimit: 10))
+        wing = wing.union(path.copy(strokingWithWidth: feather.width * weight, lineCap: .round, lineJoin: .round, miterLimit: 10))
     }
 
     return body.union(shelf).union(wing)
@@ -130,3 +132,42 @@ let icon: [String: Any] = [
 let json = try JSONSerialization.data(withJSONObject: icon, options: [.prettyPrinted, .sortedKeys])
 try json.write(to: bundle.appendingPathComponent("icon.json"))
 print("Wrote \(bundle.path)")
+
+// MARK: - Menu bar
+
+/// Black on transparent, cropped to the glyph and fitted to the 18pt menu bar height.
+func writeMenuBarGlyph(height: Int, to url: URL) throws {
+    let path = glyph(weight: 1.35)
+    let box = path.boundingBoxOfPath
+    let scale = CGFloat(height) / box.height
+    let width = Int((box.width * scale).rounded(.up))
+    let ctx = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+                        space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+    ctx.translateBy(x: 0, y: CGFloat(height))
+    ctx.scaleBy(x: scale, y: -scale)
+    ctx.translateBy(x: -box.minX, y: -box.minY)
+    ctx.addPath(path)
+    ctx.setFillColor(CGColor(gray: 0, alpha: 1))
+    ctx.fillPath()
+    guard let dest = CGImageDestinationCreateWithURL(url as CFURL, UTType.png.identifier as CFString, 1, nil) else {
+        throw CocoaError(.fileWriteUnknown)
+    }
+    CGImageDestinationAddImage(dest, ctx.makeImage()!, nil)
+    guard CGImageDestinationFinalize(dest) else { throw CocoaError(.fileWriteUnknown) }
+}
+
+let imageset = root.appendingPathComponent("app/Hermes/Hermes/Assets.xcassets/MenuBarIcon.imageset")
+try FileManager.default.createDirectory(at: imageset, withIntermediateDirectories: true)
+try writeMenuBarGlyph(height: 16, to: imageset.appendingPathComponent("menubar.png"))
+try writeMenuBarGlyph(height: 32, to: imageset.appendingPathComponent("menubar@2x.png"))
+let imagesetJSON: [String: Any] = [
+    "images": [
+        ["filename": "menubar.png", "idiom": "universal", "scale": "1x"],
+        ["filename": "menubar@2x.png", "idiom": "universal", "scale": "2x"],
+    ],
+    "info": ["author": "xcode", "version": 1],
+    "properties": ["template-rendering-intent": "template"],
+]
+try JSONSerialization.data(withJSONObject: imagesetJSON, options: [.prettyPrinted, .sortedKeys])
+    .write(to: imageset.appendingPathComponent("Contents.json"))
+print("Wrote \(imageset.path)")
