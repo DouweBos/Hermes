@@ -11,6 +11,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let history: ClipboardHistory
     let controller: ShelfController
     let launchAtLogin = LaunchAtLogin()
+    private lazy var settingsWindow = SettingsWindowController(launchAtLogin: launchAtLogin)
+    private var statusItem: StatusItemController?
 
     private let dragMonitor = DragMonitor()
     private let clipboardMonitor = ClipboardMonitor()
@@ -31,6 +33,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard !Self.isRunningTests else { return }
+
+        statusItem = StatusItemController(controller: controller) { [weak self] in self?.settingsWindow.show() }
+        controller.onShowSettings = { [weak self] in self?.settingsWindow.show() }
 
         dragMonitor.onBegan = { [weak self] point in self?.controller.externalDragBegan(at: point) }
         dragMonitor.onMoved = { [weak self] point in self?.controller.externalDragMoved(to: point) }

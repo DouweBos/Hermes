@@ -13,6 +13,39 @@ enum ShelfEdge: String, CaseIterable, Identifiable {
     var title: String { self == .left ? "Left" : "Right" }
 }
 
+enum ShelfPosition: String, CaseIterable, Identifiable {
+    case top
+    case center
+    case bottom
+
+    var id: String { rawValue }
+    var title: String { rawValue.capitalized }
+}
+
+enum ShelfSize: String, CaseIterable, Identifiable {
+    case standard
+    case largest
+    case smallest
+    /// Grows with the items, from room for three up to the screen height.
+    case automatic
+    /// Grows with the items, from room for one.
+    case automaticSmallest
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .standard: "Default (3 Items)"
+        case .largest: "Biggest"
+        case .smallest: "Smallest"
+        case .automatic: "Adjust Automatically (3 Items)"
+        case .automaticSmallest: "Adjust Automatically (Smallest)"
+        }
+    }
+
+    var isAutomatic: Bool { self == .automatic || self == .automaticSmallest }
+}
+
 enum ShelfTrigger: String, CaseIterable, Identifiable {
     /// Any drag of files, text or images.
     case anyDrag
@@ -37,6 +70,8 @@ enum ShelfTrigger: String, CaseIterable, Identifiable {
 
 enum SettingKey {
     static let edge = "shelfEdge"
+    static let position = "shelfPosition"
+    static let size = "shelfSize"
     static let trigger = "shelfTrigger"
     static let keepHandle = "keepHandleVisible"
     static let removeAfterDragOut = "removeAfterDragOut"
@@ -52,6 +87,8 @@ enum Preferences {
     static func registerDefaults() {
         defaults.register(defaults: [
             SettingKey.edge: ShelfEdge.right.rawValue,
+            SettingKey.position: ShelfPosition.center.rawValue,
+            SettingKey.size: ShelfSize.standard.rawValue,
             SettingKey.trigger: ShelfTrigger.anyDrag.rawValue,
             SettingKey.keepHandle: true,
             SettingKey.removeAfterDragOut: true,
@@ -64,6 +101,14 @@ enum Preferences {
 
     static var edge: ShelfEdge {
         ShelfEdge(rawValue: defaults.string(forKey: SettingKey.edge) ?? "") ?? .right
+    }
+
+    static var position: ShelfPosition {
+        ShelfPosition(rawValue: defaults.string(forKey: SettingKey.position) ?? "") ?? .center
+    }
+
+    static var size: ShelfSize {
+        ShelfSize(rawValue: defaults.string(forKey: SettingKey.size) ?? "") ?? .standard
     }
 
     static var trigger: ShelfTrigger {

@@ -43,7 +43,6 @@ struct HandleView: View {
 
 struct ShelfView: View {
     let controller: ShelfController
-    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         VStack(spacing: 0) {
@@ -72,10 +71,7 @@ struct ShelfView: View {
                         .disabled(controller.history.items.isEmpty)
                 }
                 Divider()
-                Button("Settings…") {
-                    NSApp.activate()
-                    openSettings()
-                }
+                Button("Settings…") { controller.onShowSettings?() }
             } label: {
                 Image(systemName: "ellipsis.circle")
             }

@@ -14,7 +14,7 @@ struct ShelfItemsView: View {
                            subtitle: "Files, text, links and images stay here until you drag them out.")
         } else {
             ScrollView {
-                LazyVStack(spacing: Theme.Spacing.xs) {
+                LazyVStack(spacing: ShelfLayout.tileSpacing) {
                     ForEach(controller.store.items) { item in
                         ItemTile(controller: controller, item: item)
                         if controller.expandedStackID == item.id {
@@ -24,7 +24,7 @@ struct ShelfItemsView: View {
                         }
                     }
                 }
-                .padding(Theme.Spacing.sm)
+                .padding(ShelfLayout.listPadding)
             }
             .scrollIndicators(.never)
         }
@@ -51,12 +51,13 @@ struct ItemTile: View {
             Text(item.title)
                 .font(.tileTitle)
                 .foregroundStyle(Theme.textPrimary)
-                .lineLimit(2)
+                .lineLimit(2, reservesSpace: true)
                 .multilineTextAlignment(.center)
                 .truncationMode(.middle)
         }
         .padding(Theme.Spacing.sm)
         .frame(maxWidth: .infinity)
+        .frame(height: ShelfLayout.tileHeight)
         .background(fill, in: RoundedRectangle(cornerRadius: Theme.Radius.tile, style: .continuous))
         .overlay(ItemInteraction(controller: controller, target: .item(item.id)))
         .overlay(alignment: .topLeading) {
@@ -107,8 +108,8 @@ struct StackEntryRow: View {
                 .truncationMode(.middle)
             Spacer(minLength: 0)
         }
-        .padding(.vertical, 3)
         .padding(.horizontal, 6)
+        .frame(height: ShelfLayout.entryRowHeight)
         .padding(.leading, Theme.Spacing.sm)
         .background(controller.hoveredID == entry.id ? Theme.hoverFill : .clear,
                     in: RoundedRectangle(cornerRadius: Theme.Radius.thumbnail, style: .continuous))

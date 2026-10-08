@@ -31,6 +31,8 @@ private struct GeneralSettings: View {
 
     @AppStorage(SettingKey.trigger) private var trigger = ShelfTrigger.anyDrag
     @AppStorage(SettingKey.edge) private var edge = ShelfEdge.right
+    @AppStorage(SettingKey.position) private var position = ShelfPosition.center
+    @AppStorage(SettingKey.size) private var size = ShelfSize.standard
     @AppStorage(SettingKey.keepHandle) private var keepHandle = true
     @AppStorage(SettingKey.removeAfterDragOut) private var removeAfterDragOut = true
     @AppStorage(SettingKey.stackDrops) private var stackDrops = true
@@ -46,6 +48,13 @@ private struct GeneralSettings: View {
                     ForEach(ShelfEdge.allCases) { Text($0.title).tag($0) }
                 }
                 .pickerStyle(.segmented)
+                Picker("Position on edge", selection: $position) {
+                    ForEach(ShelfPosition.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                Picker("Size", selection: $size) {
+                    ForEach(ShelfSize.allCases) { Text($0.title).tag($0) }
+                }
                 Toggle("Keep a handle at the edge while items are on the shelf", isOn: $keepHandle)
             }
             Section {

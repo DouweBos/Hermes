@@ -60,6 +60,26 @@ extension ShelfController {
         refreshPlacement()
     }
 
+    /// Photos, scans and sketches from Continuity Camera.
+    func importFromDevice(_ pasteboard: NSPasteboard) -> Bool {
+        let entries: [ShelfEntry]
+        if let pdf = pasteboard.data(forType: .pdf) {
+            let name = ItemStorage.timestampedName("Scan")
+            entries = [store.storage.documentEntry(pdf, fileExtension: "pdf", name: name)].compactMap { $0 }
+        } else {
+            entries = reader.entries(from: pasteboard, prefer: .images)
+        }
+        guard !entries.isEmpty else { return false }
+        add(entries, source: .paste)
+        open(tab: .shelf)
+        return true
+    }
+
+    func restoreRemoved() {
+        store.restoreRemoved()
+        open(tab: .shelf)
+    }
+
     func pasteFromClipboard() {
         let entries = reader.entries(from: .general, prefer: .text)
         guard !entries.isEmpty else {

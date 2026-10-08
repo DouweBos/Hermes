@@ -93,12 +93,46 @@ struct ShelfStoreTests {
         #expect(store.isEmpty)
     }
 
-    @Test func removingDeletesStoredContent() throws {
+    @Test func removedItemsCanBeBroughtBack() throws {
         let store = ShelfStore(storage: storage)
         let text = try #require(storage.textEntry("note"))
         store.add([text], source: .paste)
+        let item = store.items[0]
+        store.remove([item.id])
+        #expect(store.isEmpty && store.canRestore)
+        store.restoreRemoved()
+        #expect(store.items == [item])
+        #expect(!store.canRestore)
+    }
+
+    @Test func onlyTheLastRemovalIsKept() throws {
+        let store = ShelfStore(storage: storage)
+        let first = try #require(storage.textEntry("first"))
+        store.add([first], source: .paste)
+        store.add(entries(1), source: .drop)
+        store.remove([store.items[1].id])
         store.remove([store.items[0].id])
-        #expect(!FileManager.default.fileExists(atPath: text.path))
+        #expect(!FileManager.default.fileExists(atPath: first.path))
+        store.restoreRemoved()
+        #expect(store.items.count == 1)
+        #expect(store.items[0].entries[0].kind == .file)
+    }
+
+    @Test func removedStackEntriesComeBackOnTheirOwn() {
+        let store = ShelfStore(storage: storage)
+        store.add(entries(2), source: .drop)
+        let stack = store.items[0]
+        store.removeEntry(stack.entries[1].id, from: stack.id)
+        store.restoreRemoved()
+        #expect(store.items.count == 2)
+        #expect(store.items[0].entries.map(\.id) == [stack.entries[1].id])
+    }
+
+    @Test func theRemovedBatchSurvivesARelaunch() {
+        let store = ShelfStore(storage: storage)
+        store.add(entries(1), source: .drop)
+        store.remove([store.items[0].id])
+        #expect(ShelfStore(storage: storage).canRestore)
     }
 
     @Test func entriesWhoseFileIsGoneDropOff() throws {

@@ -92,6 +92,19 @@ struct ItemStorage {
         return ShelfEntry(id: id, kind: .image, name: base, path: url.path, fingerprint: "image:" + digest)
     }
 
+    /// Data that arrives as a whole document, such as a scan from an iPhone.
+    func documentEntry(_ data: Data, fileExtension: String, name: String) -> ShelfEntry? {
+        let id = UUID()
+        guard let url = write(data, id: id, name: Self.sanitized(name) + "." + fileExtension) else { return nil }
+        let digest = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+        return ShelfEntry(id: id, kind: .file, name: url.lastPathComponent, path: url.path,
+                          fingerprint: "document:" + digest)
+    }
+
+    static func timestampedName(_ prefix: String) -> String {
+        "\(prefix) \(timestamp())"
+    }
+
     /// A folder for receiving files that apps hand over as promises.
     func makePromiseDirectory() -> URL? {
         let url = dataDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)

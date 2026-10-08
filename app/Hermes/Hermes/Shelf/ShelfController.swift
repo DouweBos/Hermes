@@ -42,6 +42,7 @@ final class ShelfController {
 
     /// Called after Hermes writes to the clipboard, so the history doesn't record its own copies.
     @ObservationIgnored var onWroteClipboard: (() -> Void)?
+    @ObservationIgnored var onShowSettings: (() -> Void)?
 
     @ObservationIgnored private(set) var panel: ShelfPanel?
     @ObservationIgnored let quickLook = QuickLookSource()
@@ -60,6 +61,7 @@ final class ShelfController {
         self.store = store
         self.history = history
         reader = PasteboardReader(storage: store.storage)
+        observeContent()
     }
 
     // MARK: - Panel
@@ -84,17 +86,44 @@ final class ShelfController {
         return panel
     }
 
-    static let openSize = CGSize(width: 184, height: 520)
-    static let handleSize = CGSize(width: 22, height: 88)
-    static let edgeInset: CGFloat = 8
+    private func openHeight(in visible: NSRect) -> CGFloat {
+        let content = switch tab {
+        case .shelf:
+            ShelfLayout.contentHeight(tiles: store.items.count,
+                                      expandedEntries: expandedStackID.flatMap(store.item)?.entries.count ?? 0)
+        case .clipboard:
+            ShelfLayout.clipboardContentHeight(rows: history.items.count)
+        }
+        return ShelfLayout.height(for: Preferences.size, contentHeight: content,
+                                  maxHeight: visible.height - 2 * ShelfLayout.edgeInset)
+    }
 
-    /// Where the panel sits for a mode, against the visible area of its screen.
-    static func frame(for mode: ShelfMode, edge: ShelfEdge, in visible: NSRect) -> NSRect {
-        let size = mode == .handle ? handleSize : CGSize(width: openSize.width,
-                                                         height: min(openSize.height, visible.height - 2 * edgeInset))
-        let inset = mode == .handle ? 0 : edgeInset
-        let x = edge == .right ? visible.maxX - size.width - inset : visible.minX + inset
-        return NSRect(x: x, y: (visible.midY - size.height / 2).rounded(), width: size.width, height: size.height)
+    /// Keeps the panel in step with what it shows: resizes automatic shelves, shows or hides the handle.
+    private func observeContent() {
+        withObservationTracking {
+            _ = store.items
+            _ = history.items
+            _ = expandedStackID
+            _ = tab
+        } onChange: { [weak self] in
+            guard let self else { return }
+            // Fires before the change lands, so react on the next turn.
+            Task { @MainActor in
+                self.contentChanged()
+                self.observeContent()
+            }
+        }
+    }
+
+    private func contentChanged() {
+        switch mode {
+        case .open:
+            if Preferences.size.isAutomatic { apply(.open) }
+        case .handle:
+            if store.isEmpty || !Preferences.keepHandle { apply(.hidden) }
+        case .hidden:
+            if !store.isEmpty, Preferences.keepHandle { apply(.handle) }
+        }
     }
 
     private func apply(_ newMode: ShelfMode) {
@@ -107,7 +136,9 @@ final class ShelfController {
             return
         }
         let screen = screen ?? Self.screenWithPointer()
-        let frame = Self.frame(for: newMode, edge: Preferences.edge, in: screen.visibleFrame)
+        let visible = screen.visibleFrame
+        let frame = ShelfLayout.frame(for: newMode, edge: Preferences.edge, position: Preferences.position,
+                                      height: openHeight(in: visible), in: visible)
         if !panel.isVisible {
             panel.setFrame(frame, display: true)
             panel.alphaValue = 0

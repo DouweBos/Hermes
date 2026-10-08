@@ -11,7 +11,7 @@ final class ShelfPanel: NSPanel {
 
     init(controller: ShelfController) {
         self.controller = controller
-        super.init(contentRect: NSRect(origin: .zero, size: ShelfController.openSize),
+        super.init(contentRect: NSRect(x: 0, y: 0, width: ShelfLayout.width, height: ShelfLayout.height(rows: 3)),
                    styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
         level = .floating
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]

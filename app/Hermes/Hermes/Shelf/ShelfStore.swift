@@ -9,15 +9,20 @@ import Observation
 @Observable
 final class ShelfStore {
     private(set) var items: [ShelfItem] = []
+    /// The last batch removed, kept with its files so it can be brought back.
+    private(set) var recentlyRemoved: [ShelfItem] = []
     var selection: Set<UUID> = []
 
     let storage: ItemStorage
     private let fileName: String
+    private let removedFileName: String
 
-    init(storage: ItemStorage, fileName: String = "shelf.json") {
+    init(storage: ItemStorage, fileName: String = "shelf.json", removedFileName: String = "removed.json") {
         self.storage = storage
         self.fileName = fileName
+        self.removedFileName = removedFileName
         items = storage.load([ShelfItem].self, from: fileName) ?? []
+        recentlyRemoved = storage.load([ShelfItem].self, from: removedFileName) ?? []
         refresh()
     }
 
@@ -65,7 +70,7 @@ final class ShelfStore {
         guard !removed.isEmpty else { return }
         items.removeAll { ids.contains($0.id) }
         selection.subtract(ids)
-        storage.deleteOwnedFiles(of: removed.flatMap(\.entries))
+        replaceRecentlyRemoved(with: removed)
         save()
     }
 
@@ -76,9 +81,34 @@ final class ShelfStore {
             remove([itemID])
             return
         }
+        let item = items[index]
         items[index].entries.removeAll { $0.id == entryID }
-        storage.deleteOwnedFiles(of: [entry])
+        replaceRecentlyRemoved(with: [ShelfItem(entries: [entry], source: item.source)])
         save()
+    }
+
+    var canRestore: Bool { !recentlyRemoved.isEmpty }
+
+    /// Puts the last removed items back on top, minus any whose files have since gone.
+    func restoreRemoved() {
+        let restored = recentlyRemoved.compactMap { item -> ShelfItem? in
+            var item = item
+            item.entries = item.entries.map(storage.resolve).filter(storage.exists)
+            return item.entries.isEmpty ? nil : item
+        }
+        recentlyRemoved = []
+        storage.save(recentlyRemoved, to: removedFileName)
+        guard !restored.isEmpty else { return }
+        items.insert(contentsOf: restored, at: 0)
+        selection = Set(restored.map(\.id))
+        save()
+    }
+
+    /// Only one batch is kept; the previous one's stored content goes for good.
+    private func replaceRecentlyRemoved(with removed: [ShelfItem]) {
+        storage.deleteOwnedFiles(of: recentlyRemoved.flatMap(\.entries))
+        recentlyRemoved = removed
+        storage.save(recentlyRemoved, to: removedFileName)
     }
 
     /// Clears everything except pinned items.
