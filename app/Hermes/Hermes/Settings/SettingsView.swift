@@ -64,8 +64,8 @@ private struct GeneralSettings: View {
                     .foregroundStyle(Theme.textSecondary)
                 Toggle("Group items dropped together into a stack", isOn: $stackDrops)
                 Toggle(isOn: $captureScreenshots) {
-                    Text("Add new screenshots and recordings to the shelf")
-                    Text("Includes screenshots copied to the clipboard.")
+                    Text("Add new screenshots to the shelf")
+                    Text("Saved screenshots and ones copied to the clipboard.")
                 }
             }
             Section {
