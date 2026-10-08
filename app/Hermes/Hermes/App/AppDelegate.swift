@@ -53,9 +53,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         defaultsObserver = NotificationCenter.default.addObserver(
             forName: UserDefaults.didChangeNotification, object: nil, queue: .main
         ) { [weak self] _ in
-            MainActor.assumeIsolated { self?.applyPreferences() }
+            // Frameworks write defaults mid-layout (text measurement does); moving the panel then crashes SwiftUI.
+            DispatchQueue.main.async { self?.preferencesMayHaveChanged() }
         }
-        applyPreferences()
+        preferencesMayHaveChanged()
 
         switch UserDefaults.standard.string(forKey: "HermesOpenShelf") {
         case "clipboard": controller.open(tab: .clipboard)
@@ -69,6 +70,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         dragMonitor.stop()
         clipboardMonitor.stop()
         screenshotWatcher.stop()
+    }
+
+    private var appliedPreferences: [String] = []
+
+    private func preferencesMayHaveChanged() {
+        let current = [SettingKey.edge, SettingKey.position, SettingKey.size, SettingKey.keepHandle,
+                       SettingKey.clipboardHistory, SettingKey.clipboardLimit, SettingKey.captureScreenshots]
+            .map { "\(Preferences.defaults.object(forKey: $0) ?? "")" }
+        guard current != appliedPreferences else { return }
+        appliedPreferences = current
+        applyPreferences()
     }
 
     /// Starts or stops the optional monitors and moves the shelf when its edge changes.
