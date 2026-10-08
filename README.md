@@ -15,7 +15,7 @@ Start dragging a file, some text, a link or an image and a shelf slides in at th
 - **Import from iPhone or iPad**: photos, document scans and sketches through Continuity Camera.
 - **Edge handle**: the shelf collapses to a slim tab while it holds items; hover or drag over it to open it.
 - **Clipboard history**: recent copies in a second tab. Click to copy again, drag out, or move to the shelf. Passwords and other content apps mark as private are skipped.
-- **Screenshots**: optionally put new screenshots on the shelf as you take them.
+- **Screenshots and recordings**: optionally put new screenshots and screen recordings on the shelf as you take them, including screenshots copied to the clipboard.
 - **Quick Look, Share, Show in Finder, Open** from the context menu or the keyboard.
 - **Global shortcuts** for the shelf, the clipboard history and pasting to the shelf, all changeable in Settings.
 - Survives restarts, follows files when they're moved or renamed, works on every Space and over full-screen apps, and can open at login.

@@ -1,7 +1,7 @@
 // Monitors/ScreenshotWatcher.swift
 // Hermes
 //
-// Reports screenshots taken after it starts, wherever they're saved, through Spotlight's screen capture flag.
+// Reports screenshots and screen recordings saved after it starts, wherever they're saved, through Spotlight.
 
 import Foundation
 
@@ -14,10 +14,16 @@ final class ScreenshotWatcher {
 
     var isRunning: Bool { query != nil }
 
+    /// Recordings lack the screen capture flag, so they're matched by the tool that saved them or their name.
+    static let predicate = NSPredicate(fromMetadataQueryString: """
+        kMDItemIsScreenCapture == 1 || (kMDItemContentTypeTree == "public.movie" && \
+        (kMDItemWhereFroms == "*screencaptureui*" || kMDItemFSName == "Screen Recording*"))
+        """)
+
     func start() {
         guard query == nil else { return }
         let query = NSMetadataQuery()
-        query.predicate = NSPredicate(format: "kMDItemIsScreenCapture = 1")
+        query.predicate = Self.predicate
         query.searchScopes = [NSMetadataQueryUserHomeScope]
         let center = NotificationCenter.default
         observers = [
