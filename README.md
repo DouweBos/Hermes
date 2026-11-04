@@ -35,7 +35,7 @@ Start dragging a file, some text, a link or an image and a shelf slides in at th
 
 ## Command line
 
-Hermes ships a `hermes` command inside the app. Link it onto your `PATH` once:
+Hermes ships a `hermes` command inside the app. Install it from Settings › General › Command line tool, which links it into `/usr/local/bin`, or do that yourself:
 
 ```sh
 ln -s /Applications/Hermes.app/Contents/Resources/hermes /usr/local/bin/hermes

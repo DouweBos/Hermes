@@ -73,8 +73,35 @@ private struct GeneralSettings: View {
                         .foregroundStyle(Theme.danger)
                 }
             }
+            CommandLineToolSection()
         }
         .formStyle(.grouped)
+    }
+}
+
+private struct CommandLineToolSection: View {
+    @State private var tool = CommandLineTool()
+
+    var body: some View {
+        Section {
+            LabeledContent("Command line tool") {
+                Button(tool.isInstalled ? "Uninstall" : "Install") {
+                    tool.isInstalled ? tool.uninstall() : tool.install()
+                }
+            }
+            if let error = tool.error {
+                Text(error)
+                    .font(.caption)
+                    .foregroundStyle(Theme.danger)
+            }
+        } footer: {
+            Text(tool.isInstalled
+                 ? "Run hermes --help in Terminal to see what it can do."
+                 : "Adds hermes to \(tool.link.deletingLastPathComponent().path), to put files, links and text on the shelf from Terminal.")
+                .font(.caption)
+                .foregroundStyle(Theme.textSecondary)
+        }
+        .onAppear { tool.refresh() }
     }
 }
 
