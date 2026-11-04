@@ -10,6 +10,8 @@ enum ItemSource: String, Codable, Hashable {
     case paste
     case clipboard
     case screenshot
+    /// Opened with Hermes, or sent by the `hermes` command.
+    case command
 }
 
 struct ShelfItem: Identifiable, Codable, Hashable {

@@ -67,6 +67,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    func application(_ application: NSApplication, open urls: [URL]) {
+        guard !Self.isRunningTests else { return }
+        ExternalRequest.requests(for: urls).forEach(controller.handle)
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
         dragMonitor.stop()
         clipboardMonitor.stop()

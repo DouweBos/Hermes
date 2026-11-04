@@ -33,6 +33,24 @@ Start dragging a file, some text, a link or an image and a shelf slides in at th
 | ⌘C / ⌘V / ⌘A | Copy, paste to the shelf, select all |
 | Escape | Collapse the shelf |
 
+## Command line
+
+Hermes ships a `hermes` command inside the app. Link it onto your `PATH` once:
+
+```sh
+ln -s /Applications/Hermes.app/Contents/Resources/hermes /usr/local/bin/hermes
+```
+
+```sh
+hermes report.pdf screenshot.png      # files, as one stack
+hermes https://example.com            # a link
+hermes text "call back at 3"          # text
+pbpaste | hermes                      # whatever is piped in
+hermes show clipboard                 # open the shelf or clipboard history
+```
+
+Underneath it opens `hermes://add?path=…&url=…&text=…` and `hermes://show?tab=shelf|clipboard`, which other apps and scripts can use directly. `open -a Hermes file…` and Finder's Open With also put files on the shelf.
+
 ## Requirements
 
 - macOS 15 or later
@@ -67,6 +85,7 @@ app/Hermes/Hermes/
   Models/         Items, entries, settings
   Settings/       Settings window
   DesignSystem/   Theme and shared components
+  Resources/      The `hermes` command
 scripts/          App icon renderer
 ```
 

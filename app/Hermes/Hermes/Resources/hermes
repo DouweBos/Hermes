@@ -1,0 +1,66 @@
+#!/bin/sh
+# Puts files, links and text on the Hermes shelf through its hermes:// URL scheme.
+
+usage() {
+    cat <<'EOF'
+Usage:
+  hermes [add] <file|url|->...   Put files, links or stdin (-) on the shelf
+  hermes text <text>...          Put text on the shelf
+  hermes show [shelf|clipboard]  Show the shelf or the clipboard history
+
+Things given together land as one stack. With no arguments and piped input, adds stdin.
+EOF
+}
+
+# Builds the URL in one go; JavaScript's encodeURIComponent saves depending on anything not on every Mac.
+send() {
+    url=$(osascript -l JavaScript -e '
+        function run(argv) {
+            const [action, ...pairs] = argv, query = []
+            for (let i = 0; i < pairs.length; i += 2)
+                query.push(pairs[i] + "=" + encodeURIComponent(pairs[i + 1]))
+            return "hermes://" + action + (query.length ? "?" + query.join("&") : "")
+        }' "$@") || exit 1
+    open -g "$url"
+}
+
+add() {
+    set -- "$@" --end
+    while [ "$1" != --end ]; do
+        case "$1" in
+            -) set -- "$@" text "$(cat)" ;;
+            http://*|https://*) set -- "$@" url "$1" ;;
+            *)
+                if [ ! -e "$1" ]; then
+                    echo "hermes: no such file: $1" >&2
+                    exit 1
+                fi
+                case "$1" in
+                    /*) set -- "$@" path "$1" ;;
+                    *) set -- "$@" path "$PWD/$1" ;;
+                esac
+                ;;
+        esac
+        shift
+    done
+    shift
+    [ $# -gt 0 ] || { usage >&2; exit 1; }
+    send add "$@"
+}
+
+case "$1" in
+    -h|--help|help) usage ;;
+    show) send show tab "${2:-shelf}" ;;
+    text)
+        shift
+        [ $# -gt 0 ] || { usage >&2; exit 1; }
+        for text; do set -- "$@" text "$text"; shift; done
+        send add "$@"
+        ;;
+    add) shift; add "$@" ;;
+    "")
+        if [ -t 0 ]; then usage >&2; exit 1; fi
+        add -
+        ;;
+    *) add "$@" ;;
+esac

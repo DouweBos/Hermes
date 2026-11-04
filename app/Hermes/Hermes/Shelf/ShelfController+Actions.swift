@@ -91,7 +91,35 @@ extension ShelfController {
     }
 
     func addScreenshot(_ url: URL) {
-        add([store.storage.fileEntry(for: url)], source: .screenshot)
+        addAndPeek([store.storage.fileEntry(for: url)], source: .screenshot)
+    }
+
+    /// Files opened with Hermes, the `hermes` command and `hermes://` URLs.
+    func handle(_ request: ExternalRequest) {
+        switch request {
+        case .add(let contents):
+            let storage = store.storage
+            let entries = contents.compactMap { content -> ShelfEntry? in
+                switch content {
+                case .file(let url):
+                    FileManager.default.fileExists(atPath: url.path) ? storage.fileEntry(for: url) : nil
+                case .text(let text): storage.textEntry(text)
+                case .link(let url): storage.linkEntry(url)
+                }
+            }
+            guard !entries.isEmpty else {
+                NSSound.beep()
+                return
+            }
+            addAndPeek(entries, source: .command)
+        case .show(let tab):
+            open(tab: tab)
+        }
+    }
+
+    /// Shows what arrived without the pointer anywhere near, then tucks the shelf away again.
+    private func addAndPeek(_ entries: [ShelfEntry], source: ItemSource) {
+        add(entries, source: source)
         open(tab: .shelf)
         if !isPointerInside { scheduleCollapse(after: 3) }
     }
