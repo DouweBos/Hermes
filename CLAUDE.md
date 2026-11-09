@@ -1,6 +1,6 @@
 # Hermes
 
-A free, open source drag-and-drop shelf for macOS: a menu bar app with a floating panel at the screen edge. Its design language follows Grove (`../Grove`).
+A free, open source drag-and-drop shelf for macOS: a menu bar app with a floating panel at the screen edge. Its design language follows [Grove](https://github.com/DouweBos/Grove) (`../Grove` when checked out alongside).
 
 ## Development Guidelines
 
