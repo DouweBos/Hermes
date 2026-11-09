@@ -54,12 +54,15 @@ Underneath it opens `hermes://add?path=…&url=…&text=…` and `hermes://show?
 ## Requirements
 
 - macOS 15 or later
-- Xcode 27 to build
+- To build from source: Xcode 27 or later. No paid Apple Developer account is needed.
 
-## Building
+Hermes uses only public macOS APIs. It isn't sandboxed, so it can read the files you put on the shelf wherever they are; macOS asks for folder access the first time it shows previews from Desktop, Documents, Downloads or external drives.
+
+## Building from source
 
 ```sh
-cd app/Hermes
+git clone https://github.com/DouweBos/Hermes.git
+cd Hermes/app/Hermes
 xcodebuild -project Hermes.xcodeproj -scheme Hermes -derivedDataPath build -destination 'platform=macOS,arch=arm64' build
 open build/Build/Products/Debug/Hermes.app
 ```
@@ -70,7 +73,7 @@ Tests:
 xcodebuild -project Hermes.xcodeproj -scheme Hermes -derivedDataPath build -destination 'platform=macOS,arch=arm64' test -only-testing:HermesTests
 ```
 
-To build with your own Apple ID, change the development team in the project's Signing & Capabilities.
+The project is signed with the maintainer's team. Pick your own team in Signing & Capabilities, or build ad-hoc signed without an Apple account by adding `CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=` to the build command. [CONTRIBUTING.md](CONTRIBUTING.md) has the details.
 
 ## Project structure
 
@@ -91,6 +94,14 @@ scripts/          App icon renderer
 
 Data lives in `~/Library/Application Support/Hermes`.
 
+## Contributing
+
+Bug reports, ideas and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) to get started, and please follow the [Code of Conduct](CODE_OF_CONDUCT.md). Report security issues privately as described in [SECURITY.md](SECURITY.md).
+
 ## License
 
-MIT
+Hermes is released under the [MIT License](LICENSE). Copyright (c) 2026 Douwe Bos.
+
+It uses [KeyboardShortcuts](https://github.com/sindresorhus/KeyboardShortcuts) by Sindre Sorhus, also MIT licensed.
+
+Made by Douwe Bos, [houwert.dev](https://houwert.dev).
